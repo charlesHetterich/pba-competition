@@ -42,7 +42,7 @@ contract Labeler {
 
     function submit_sample(
         string memory ipfs_url,
-        string memory description
+        string memory description,
         uint256 submission_period
     ) public {
         counterId += 1;
@@ -56,10 +56,7 @@ contract Labeler {
         emit SampleSubmitted(counterId, ipfs_url, description);
     }
 
-    function submit_label(
-        uint256 target_sample,
-        uint256 memory ipfs_url_hash
-    ) public {
+    function submit_label(uint256 target_sample, uint256 ipfs_url_hash) public {
         require(samples[target_sample].id != 0, "Sample does not exist");
         require(
             block.number - samples[target_sample].submission_block <
@@ -69,7 +66,7 @@ contract Labeler {
 
         uint256 labelId = samples[target_sample].labels.length;
         samples[target_sample].labels.push(
-            Label(labelId, msg.sender, url_hash, "")
+            Label(labelId, msg.sender, ipfs_url_hash, "")
         );
     }
 
@@ -80,10 +77,7 @@ contract Labeler {
         uint256 target_label,
         string memory ipfs_url
     ) public {
-        require(
-            samples[target_sample].id != 0,
-            "Sample does not exist"
-        );
+        require(samples[target_sample].id != 0, "Sample does not exist");
         require(
             samples[target_sample].labels[target_label].labeler == msg.sender,
             "Only the labeler can reveal the label"
@@ -94,7 +88,8 @@ contract Labeler {
 
         // Validate the hash matches the previously submitted hash
         require(
-            computedHash == bytes32(samples[target_sample].labels[target_label].url_hash),
+            computedHash ==
+                bytes32(samples[target_sample].labels[target_label].url_hash),
             "Provided URL does not match the previously submitted hash"
         );
 
@@ -102,7 +97,7 @@ contract Labeler {
         samples[target_sample].labels[target_label].ipfs_url = ipfs_url;
     }
 
-    function distribute_reward() {
+    function distribute_reward() public {
         // . . .
     }
 }
