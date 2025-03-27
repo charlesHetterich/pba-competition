@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 struct Sample {
     uint256 id;
     string sample_ipfs_url;
+    string description;
     Label[] labels;
 }
 
@@ -18,15 +19,6 @@ contract Labeler {
 
     mapping(uint256 => Sample) public samples;
 
-    // sample id --> sample
-    // mapping(uint256 => string) private sampleIdToIpfsUrlAndType;
-
-    // // label id --> label
-    // mapping(uint256 => (string, address)) private sampleIdToIpfsUrlAndType;
-
-    // // sample id --> many label ids
-    // mapping(uint256 => uint256[]) private sampleIdToLabelIds;
-
     // given new sample, return
     event SampleSubmitted(int sample_id, string ipfs_url, string description);
 
@@ -37,28 +29,30 @@ contract Labeler {
     }
 
     function submit_sample(
-        string ipfs_url,
-        string description
-    ) public pure returns (int memory) {
+        string memory ipfs_url,
+        string memory description
+    ) public {
         // increment counter
         counterId += 1;
 
-        // store sample
-
-        Sample storage newSample = samples[counterId];
-        newSample.id = counterId;
-        newSample.sample_ipfs_url = ipfs_url;
+        Sample memory newSample = Sample(
+            counterId,
+            ipfs_url,
+            description,
+            new Label[](0)
+        );
+        samples[counterId] = newSample;
 
         emit SampleSubmitted(int(counterId), ipfs_url, description);
     }
 
     function submit_label(
-        int target_sample,
-        string ipfs_url,
-        int x,
-        int y
-    ) external pure returns (int memory) {
+        uint256 target_sample,
+        string memory ipfs_url
+    ) public {
         // store label
-        sampleIdToIpfsUrlAndType[target_sample] = ipfs_url;
+        samples[target_sample].labels.push(
+            Label(counterId, msg.sender, ipfs_url)
+        );
     }
 }
