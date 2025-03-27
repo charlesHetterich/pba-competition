@@ -9,7 +9,7 @@ struct Sample {
 }
 
 struct Label {
-    uint256 id;
+    uint256 id; // ID within the sample's labels array
     address labeler;
     string label_ipfs_url;
 }
@@ -19,8 +19,11 @@ contract Labeler {
 
     mapping(uint256 => Sample) public samples;
 
-    // given new sample, return
-    event SampleSubmitted(int sample_id, string ipfs_url, string description);
+    event SampleSubmitted(
+        uint256 sample_id,
+        string ipfs_url,
+        string description
+    );
 
     constructor() {}
 
@@ -32,27 +35,22 @@ contract Labeler {
         string memory ipfs_url,
         string memory description
     ) public {
-        // increment counter
         counterId += 1;
-
-        Sample memory newSample = Sample(
-            counterId,
-            ipfs_url,
-            description,
-            new Label[](0)
-        );
-        samples[counterId] = newSample;
-
-        emit SampleSubmitted(int(counterId), ipfs_url, description);
+        samples[counterId].id = counterId;
+        samples[counterId].sample_ipfs_url = ipfs_url;
+        samples[counterId].description = description;
+        // labels is automatically an empty array
+        emit SampleSubmitted(counterId, ipfs_url, description);
     }
 
     function submit_label(
         uint256 target_sample,
         string memory ipfs_url
     ) public {
-        // store label
+        require(samples[target_sample].id != 0, "Sample does not exist");
+        uint256 labelId = samples[target_sample].labels.length;
         samples[target_sample].labels.push(
-            Label(counterId, msg.sender, ipfs_url)
+            Label(labelId, msg.sender, ipfs_url)
         );
     }
 }
