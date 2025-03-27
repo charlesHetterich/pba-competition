@@ -13,7 +13,7 @@ Can only submit one answer per sample
 
 
 
-## - -
+### Process
 
 1. submit sample
 2. labellers submit hashes to their answers during submission period
